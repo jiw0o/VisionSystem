@@ -1,0 +1,7 @@
+<launch>
+    <!--include file="$(find pylon_camera)/launch/vision.launch"> </include-->
+    <!--node pkg="cv_camera" type="cv_camera_node" name="cv_camera" respawn="true"/-->
+    <node pkg="vision_system" type="connector.py" name="connector" output="screen" args="300 300"/>
+    <node pkg="vision_system" type="pinhole_tester.py" name="pinhole_tester" output="screen"/>
+    <node pkg="vision_system" type="pinhole_trigger.py" name="pinhole_trigger" output="screen" respawn="true"/>
+</launch>
