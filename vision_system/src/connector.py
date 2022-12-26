@@ -32,6 +32,7 @@ class Connector:
             sys.exit(1)
         row, col = img1.shape
         src = cv2.hconcat([img1[0:row, 0:(col - self.a)], img2, img3[0:row, self.b:col]])
+        #src = cv2.hconcat([img1, img2, img3])
         out_img = self.bridge.cv2_to_imgmsg(src, "mono8")
         # out_img = self.bridge.cv2_to_imgmsg(img2, "mono8")
         self.image_pub.publish(out_img)
@@ -42,4 +43,5 @@ if __name__ == "__main__":
     rospy.loginfo("Connecting 3 images")
     while not rospy.is_shutdown():
         c = Connector(sys.argv[1], sys.argv[2])
+        #c = Connector(0, 0)
         rospy.spin()

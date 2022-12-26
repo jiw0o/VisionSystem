@@ -1,0 +1,17 @@
+roi :
+  light_upper_1 : 154
+  light_upper_2 : 175
+  light_upper_3 : 155
+  light_lower_1 : 1877
+  light_lower_2 : 1890
+  light_lower_3 : 1866
+  film_height : 1735
+  overlap12 : 73
+  overlap23 : 131
+  side_cut_left : 89
+  side_cut_right : 678
+  min_hole : 10
+  max_hole : 100
+  min_carbon : 55
+  max_carbon : 70
+  
