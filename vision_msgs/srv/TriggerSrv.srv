@@ -1,10 +1,4 @@
-sensor_msgs/Image input1
-sensor_msgs/Image input2
-sensor_msgs/Image input3
-int64 left
-int64 right
-int64 upper
-int64 lower
+int32 holes
+int32 index
 ---
-uint64 holes
-sensor_msgs/Image output
+bool state

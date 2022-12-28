@@ -124,10 +124,10 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
-  src/connector.py
-  src/pinhole_tester.py
+  src/camera_tester.py
+  src/pinhole_result.py
   src/pinhole_trigger.py
-  src/pinhole_steady.py
+  src/frame_save.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

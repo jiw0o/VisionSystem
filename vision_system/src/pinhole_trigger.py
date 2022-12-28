@@ -1,10 +1,10 @@
-#!/usr/bin/env python
+#!/home/jiwoo/catkin_ws/vision/bin/python3
 
 from collections import deque
 import rospy, cv2, cv_bridge, sys
 import numpy as np
 from sensor_msgs.msg import Image
-from std_msgs.msg import Int32
+from vision_msgs.srv import *
 
 
 class PinTester :
@@ -41,6 +41,7 @@ class Pintrigger :
         self.idx = idx
         self.bridge = cv_bridge.CvBridge()
         self.tester = PinTester()
+        self.cnt = 0
         self.def_topic()
         self.get_param()
 
@@ -50,7 +51,7 @@ class Pintrigger :
         result_name = '/result_' + str(self.idx)
         self.img_sub = rospy.Subscriber(camera_name, Image, self.read_image, queue_size=100)
         self.img_pub = rospy.Publisher(output_name, Image, queue_size=100)
-        self.res_pub = rospy.Publisher(result_name, Int32, queue_size=10)
+        self.res_srv = rospy.ServiceProxy(result_name, TriggerSrv)
 
     def get_param(self) :
         self.upper1 = rospy.get_param("/roi/light_upper_1")
@@ -170,6 +171,13 @@ class Pintrigger :
                     prev = h
         return round(carbon / 14)
 
+    def service_result(self, holes) :
+        if holes >= 0 : print("Send", self.idx, holes)
+        try : return self.res_srv(holes, self.idx)
+        except rospy.ServiceException as e :
+            print("Service call failed:", e)
+            sys.exit(1)
+
     def read_image(self, msg) :
         if self.idx == 1 : cam = self.cut_roi(msg, self.upper1, self.lower1, self.left, self.over12)    
         elif self.idx == 2 : cam = self.cut_roi(msg, self.upper2, self.lower2, 0, 0)    
@@ -181,11 +189,13 @@ class Pintrigger :
             h, outimg = self.tester.test_pinhole(cam)
             out = self.bridge.cv2_to_imgmsg(outimg, "bgr8")
             self.img_pub.publish(out)
-            self.res_pub.publish(h)
+            self.service_result(h)
+            self.cnt = 0
         else :
-            self.res_pub.publish(-t)
-            #out = self.bridge.cv2_to_imgmsg(cam, "mono8")
-            #self.img_pub.publish(out)
+            self.cnt += 1
+            if self.cnt > 10 :
+                self.service_result(-1)
+                self.cnt = 0
 
 
 if __name__ == "__main__" :
