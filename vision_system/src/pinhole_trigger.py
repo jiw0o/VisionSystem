@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 #!/home/jiwoo/catkin_ws/vision/bin/python3
 
 from collections import deque
-import rospy, cv2, cv_bridge, sys
+import rospy, cv2, cv_bridge, sys, os, datetime
 import numpy as np
 from sensor_msgs.msg import Image
 from vision_msgs.srv import *
@@ -15,7 +16,10 @@ class PinTester :
 
     def test_pinhole(self, img):
         inverse = 255 - img
-        contours, hierarchy = cv2.findContours(inverse, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+        if int(cv2.__version__[0]) >= 4 :
+            contours, hierarchy = cv2.findContours(inverse, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+        else :
+            _, contours, hierarchy = cv2.findContours(inverse, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
         color = cv2.merge([img, img, img])
         if (contours is None) or (hierarchy is None) :
             num_holes = 0
@@ -31,7 +35,7 @@ class PinTester :
                         cv2.drawContours(color, contours, x, [0, 255, 0], 1)
                         num_holes += 1
                         #print("%dth : %d" % (num_holes, px))
-                        cv2.putText(color, str(num_holes), tuple(contours[x][0][0]), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 255, 0), 1)
+                        cv2.putText(color, str(num_holes)+": "+str(px), tuple(contours[x][0][0]), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 255, 0), 1)
             #print('[pinhole_tester] Hole / Contour = %d / %d' % (num_holes, num_contours))
         return num_holes, color
 
@@ -42,6 +46,11 @@ class Pintrigger :
         self.bridge = cv_bridge.CvBridge()
         self.tester = PinTester()
         self.cnt = 0
+        dt_now = datetime.datetime.now()
+        #home = '/home/visionsystem/Results/'
+        home = '/home/jiwoo/Results/'
+        self.folder = home + dt_now.strftime("%Y_%m_%d_%H_%M_%S")
+        if idx == 1 : os.mkdir(self.folder)
         self.def_topic()
         self.get_param()
 
@@ -141,7 +150,7 @@ class Pintrigger :
 
     def cut_roi(self, imgmsg, h1, h2, w1, w2) :
         img = self.bridge.imgmsg_to_cv2(imgmsg, desired_encoding='mono8')
-        height, width = img.shape
+        _, width = img.shape
         wr = width - 1 - w2
         roi = img[h1 : h2, w1 : wr].copy()
         fh = float(self.height) / float(h2 - h1)
@@ -153,24 +162,48 @@ class Pintrigger :
         if length >= self.min_carbon and length <= self.max_carbon : return True
         else : return False
 
-    def trigger(self, img) :
+    def trigger(self, img, sample) :
         height, width = img.shape
-        carbon = 0
-        dw = width // 15
-        for w in range(1, 15) :
-            w = w * dw
+        carbon = [0] * sample
+        dw = width // (sample+1)
+        for i in range(1, sample+1) :
+            w = i * dw
             color, prev = 0, 0
             for h in range(0, height):
                 if img[h, w] == 255 and color == 0 :
+                    #print(h-prev)
                     if self.is_carbon(h - prev) :
-                        carbon = carbon + 1
+                        carbon[i-1] = carbon[i-1] + 1
                     color = 1
                     prev = h
                 elif img[h, w] == 0 and color == 1 :
                     color = 0
                     prev = h
-        return round(carbon / 14)
+        a = np.bincount(carbon)
+        return a.argmax()
 
+    def check(self, img, sample) :
+        color_img = cv2.merge([img, img, img])
+        height, width = img.shape
+        carbon = 0
+        dw = width // (sample+1)
+        for i in range(1, sample+1) :
+            w = i * dw
+            color, prev = 0, 0
+            for h in range(0, height):
+                if img[h, w] == 255 and color == 0 :
+                    if self.is_carbon(h - prev) :
+                        color_img[prev:h, w-1:w+1] = [255, 0, 0]
+                    else :
+                        color_img[prev:h, w-1:w+1] = [0, 255, 0]
+                    color = 1
+                    prev = h
+                elif img[h, w] == 0 and color == 1 :
+                    color_img[prev:h, w-1:w+1] = [0, 0, 255]
+                    color = 0
+                    prev = h
+        return color_img
+    
     def service_result(self, holes) :
         if holes >= 0 : print("Send", self.idx, holes)
         try : return self.res_srv(holes, self.idx)
@@ -183,15 +216,25 @@ class Pintrigger :
         elif self.idx == 2 : cam = self.cut_roi(msg, self.upper2, self.lower2, 0, 0)    
         elif self.idx == 3 : cam = self.cut_roi(msg, self.upper3, self.lower3, self.over23, self.right)    
         h = -1
-        t = self.trigger(cam)
+        t = self.trigger(cam, 4)
+        #if self.idx == 1 : print(t)
         if t == 16 :
             cam = self.stripe(cam, 50, 35)
             h, outimg = self.tester.test_pinhole(cam)
             out = self.bridge.cv2_to_imgmsg(outimg, "bgr8")
+            if h > 0 :
+                now = datetime.datetime.now()
+                strnow = now.strftime("%H_%M_%S")
+                file = self.folder + "/cam" + str(self.idx) + "-" + strnow + ".jpg"
+                cv2.imwrite(file, outimg)
             self.img_pub.publish(out)
             self.service_result(h)
             self.cnt = 0
         else :
+            #cam = self.stripe(cam, 50, 35)
+            #out = self.bridge.cv2_to_imgmsg(self.check(cam, 20), "bgr8")
+            #out = self.bridge.cv2_to_imgmsg(cam, "mono8")
+            #self.img_pub.publish(out)
             self.cnt += 1
             if self.cnt > 10 :
                 self.service_result(-1)

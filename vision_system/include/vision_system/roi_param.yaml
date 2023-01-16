@@ -1,17 +1,16 @@
 roi :
-  light_upper_1 : 154
-  light_upper_2 : 175
-  light_upper_3 : 155
-  light_lower_1 : 1877
-  light_lower_2 : 1890
-  light_lower_3 : 1866
-  film_height : 1735
-  overlap12 : 73
-  overlap23 : 131
-  side_cut_left : 89
-  side_cut_right : 678
-  min_hole : 10
-  max_hole : 100
+  light_upper_1 : 301
+  light_upper_2 : 256
+  light_upper_3 : 306
+  light_lower_1 : 1751
+  light_lower_2 : 1702
+  light_lower_3 : 1734
+  film_height : 1450
+  overlap12 : 110
+  overlap23 : 138
+  side_cut_left : 590
+  side_cut_right : 782
+  min_hole : 5
+  max_hole : 1000
   min_carbon : 55
-  max_carbon : 70
-  
+  max_carbon : 75
