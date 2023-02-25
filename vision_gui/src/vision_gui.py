@@ -1,4 +1,5 @@
-#!/home/jiwoo/catkin_ws/vision/bin/python3
+#!/usr/bin/env python
+
 import sys, rospy, tempfile, cv2, cv_bridge
 import message_filters
 from sensor_msgs.msg import Image
@@ -63,10 +64,10 @@ class MainWindow(QMainWindow, form_class) :
         self.right_spin.setProperty("value", rospy.get_param("/roi/side_cut_right"))
         self.over12_spin.setProperty("value", rospy.get_param("/roi/overlap12"))
         self.over23_spin.setProperty("value", rospy.get_param("/roi/overlap23"))
-        self.MinHole.setProperty("value", rospy.get_param("/roi/min_hole"))
-        self.MaxHole.setProperty("value", rospy.get_param("/roi/max_hole"))
-        self.MinCarbon.setProperty("value", rospy.get_param("/roi/min_carbon"))
-        self.MaxCarbon.setProperty("value", rospy.get_param("/roi/max_carbon"))
+        self.MinHole.setProperty("value", rospy.get_param("/tester/min_hole"))
+        self.MaxHole.setProperty("value", rospy.get_param("/tester/max_hole"))
+        self.MinCarbon.setProperty("value", rospy.get_param("/tester/min_carbon"))
+        self.MaxCarbon.setProperty("value", rospy.get_param("/tester/max_carbon"))
 
     def set_params(self) :
         rospy.set_param('/roi/light_upper_1', self.up1_spin.value()) 
@@ -80,10 +81,10 @@ class MainWindow(QMainWindow, form_class) :
         rospy.set_param('/roi/side_cut_left', self.left_spin.value())
         rospy.set_param('/roi/side_cut_right', self.right_spin.value())
         rospy.set_param('/roi/film_height', self.height_spin.value())
-        rospy.set_param('/roi/min_hole', self.MinHole.value())
-        rospy.set_param('/roi/max_hole', self.MaxHole.value())
-        rospy.set_param('/roi/min_carbon', self.MinCarbon.value())
-        rospy.set_param('/roi/max_carbon', self.MaxCarbon.value())
+        rospy.set_param('/tester/min_hole', self.MinHole.value())
+        rospy.set_param('/tester/max_hole', self.MaxHole.value())
+        rospy.set_param('/tester/min_carbon', self.MinCarbon.value())
+        rospy.set_param('/tester/max_carbon', self.MaxCarbon.value())
         
 
 
@@ -101,10 +102,10 @@ class MainWindow(QMainWindow, form_class) :
         f.write("  overlap23 : " + str(rospy.get_param("/roi/overlap23")) + "\n")
         f.write("  side_cut_left : " + str(rospy.get_param("/roi/side_cut_left")) + "\n")
         f.write("  side_cut_right : " + str(rospy.get_param("/roi/side_cut_right")) + "\n")
-        f.write("  min_hole : " + str(rospy.get_param("/roi/min_hole")) + "\n")
-        f.write("  max_hole : " + str(rospy.get_param("/roi/max_hole")) + "\n")
-        f.write("  min_carbon : " + str(rospy.get_param("/roi/min_carbon")) + "\n")
-        f.write("  max_carbon : " + str(rospy.get_param("/roi/max_carbon")))
+        f.write("  min_hole : " + str(rospy.get_param("/tester/min_hole")) + "\n")
+        f.write("  max_hole : " + str(rospy.get_param("/tester/max_hole")) + "\n")
+        f.write("  min_carbon : " + str(rospy.get_param("/tester/min_carbon")) + "\n")
+        f.write("  max_carbon : " + str(rospy.get_param("/tester/max_carbon")))
         f.close()
 
     def set_scaler(self, value) :

@@ -1,12 +1,12 @@
 <launch>
-    <!--include file="$(find pylon_camera)/launch/vision.launch"> </include-->
     <!--node pkg="cv_camera" type="cv_camera_node" name="cv_camera" respawn="true"/-->
+    <!--include file="$(find pylon_camera)/launch/vision.launch"> </include-->
     <rosparam file="$(find vision_system)/include/vision_system/roi_param.yaml" command='load'/>
     <param name="system_path" value="$(find vision_system)"/>
     <param name="gui_path" value="$(find vision_gui)"/>
-    <node pkg="vision_system" type="pinhole_trigger.py" name="pinhole_trigger1" output="screen" args="1" respawn="true"/>
-    <node pkg="vision_system" type="pinhole_trigger.py" name="pinhole_trigger2" output="screen" args="2" respawn="true"/>
-    <node pkg="vision_system" type="pinhole_trigger.py" name="pinhole_trigger3" output="screen" args="3" respawn="true"/>
-    <node pkg="vision_system" type="pinhole_result.py" name="pinhole_result" output="screen" args="3" respawn="true"/>
-    <node pkg="rosserial_python" type="serial_node.py" name="serial_node" output="screen" args="/dev/ttyACM0 9600" respawn="true"/>
+    <node pkg="vision_system" type="pinhole_tester.py" name="pinhole_tester1" output="screen" args="1"/>
+    <node pkg="vision_system" type="pinhole_tester.py" name="pinhole_tester2" output="screen" args="2"/>
+    <node pkg="vision_system" type="pinhole_tester.py" name="pinhole_tester3" output="screen" args="3"/>
+    <node pkg="vision_system" type="pinhole_result.py" name="pinhole_result" output="screen"/>
+    <node pkg="rosserial_python" type="serial_node.py" name="serial_node" output="screen" args="/dev/ttyACM0 9600"/>
 </launch>

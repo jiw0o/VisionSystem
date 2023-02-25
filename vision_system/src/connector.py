@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-#!/home/jiwoo/catkin_ws/vision/bin/python3
 
 import cv2
 import cv_bridge

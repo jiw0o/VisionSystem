@@ -127,6 +127,7 @@ catkin_install_python(PROGRAMS
   src/camera_tester.py
   src/pinhole_result.py
   src/pinhole_trigger.py
+  src/pinhole_tester.py
   src/frame_save.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

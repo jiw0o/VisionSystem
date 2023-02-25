@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-#!/home/jiwoo/catkin_ws/vision/bin/python3
 
 from collections import deque
 import rospy, cv2, cv_bridge, sys, os, datetime
