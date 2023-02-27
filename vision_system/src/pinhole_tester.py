@@ -356,7 +356,7 @@ class Pintrigger :
 
 
 if __name__ == "__main__" :
-    rospy.init_node('trigger_node', anonymous=True)
+    rospy.init_node('tester_node', anonymous=True)
     rospy.set_param("trigger_param", False)
     idx = int(sys.argv[1])
     if idx == -1 :
