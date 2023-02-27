@@ -1,0 +1,6 @@
+
+1. QT Creator Build
+
+2. pyuic5 -x vision_gui.ui -o vision_gui_ui.py
+
+3. vision_gui.py 파일 사용

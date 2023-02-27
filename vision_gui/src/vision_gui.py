@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys, rospy, tempfile, cv2, cv_bridge
+import sys, rospy, tempfile, cv2, cv_bridge, math
 import message_filters
 from sensor_msgs.msg import Image
 from PyQt5.QtWidgets import *
@@ -36,6 +36,7 @@ class MainWindow(QMainWindow, form_class) :
         self.MaxHole.valueChanged.connect(self.set_params)
         self.MinCarbon.valueChanged.connect(self.set_params)
         self.MaxCarbon.valueChanged.connect(self.set_params)
+        self.ThreshValue.valueChanged.connect(self.set_params)
 
         self.scale_value = 0.5
         self.ScaleBar.valueChanged[int].connect(self.set_scaler)
@@ -68,6 +69,9 @@ class MainWindow(QMainWindow, form_class) :
         self.MaxHole.setProperty("value", rospy.get_param("/tester/max_hole"))
         self.MinCarbon.setProperty("value", rospy.get_param("/tester/min_carbon"))
         self.MaxCarbon.setProperty("value", rospy.get_param("/tester/max_carbon"))
+        self.ThreshValue.setProperty("value", rospy.get_param("/tester/thresh"))
+        self.Height = rospy.get_param("/origin/height")
+        self.Width = rospy.get_param("/origin/width")
 
     def set_params(self) :
         rospy.set_param('/roi/light_upper_1', self.up1_spin.value()) 
@@ -85,6 +89,9 @@ class MainWindow(QMainWindow, form_class) :
         rospy.set_param('/tester/max_hole', self.MaxHole.value())
         rospy.set_param('/tester/min_carbon', self.MinCarbon.value())
         rospy.set_param('/tester/max_carbon', self.MaxCarbon.value())
+        rospy.set_param('/tester/thresh', self.Thresh.value())
+        rospy.set_param('/origin/height', self.Height)
+        rospy.set_param('/origin/width', self.Width)
         
 
 
@@ -102,10 +109,15 @@ class MainWindow(QMainWindow, form_class) :
         f.write("  overlap23 : " + str(rospy.get_param("/roi/overlap23")) + "\n")
         f.write("  side_cut_left : " + str(rospy.get_param("/roi/side_cut_left")) + "\n")
         f.write("  side_cut_right : " + str(rospy.get_param("/roi/side_cut_right")) + "\n")
+        f.write("tester :\n")
         f.write("  min_hole : " + str(rospy.get_param("/tester/min_hole")) + "\n")
         f.write("  max_hole : " + str(rospy.get_param("/tester/max_hole")) + "\n")
         f.write("  min_carbon : " + str(rospy.get_param("/tester/min_carbon")) + "\n")
-        f.write("  max_carbon : " + str(rospy.get_param("/tester/max_carbon")))
+        f.write("  max_carbon : " + str(rospy.get_param("/tester/max_carbon")) + "\n")
+        f.write("  thresh : " + str(rospy.get_param("/tester/thresh")) + "\n")
+        f.write("origin :\n")
+        f.write("  height : " + str(rospy.get_param("/origin/height")) + "\n")
+        f.write("  width : " + str(rospy.get_param("/origin/width")))
         f.close()
 
     def set_scaler(self, value) :
@@ -136,8 +148,25 @@ class MainWindow(QMainWindow, form_class) :
             img = self.bridge.imgmsg_to_cv2(sub3, "bgr8")
         elif self.mode == 3 :
             img = self.bridge.imgmsg_to_cv2(sub4, "mono8")
-        
+
+        h, w = img.shape[0], img.shape[1]
+        if self.mode < 3 :
+            a1 = rospy.get_param("/tester/max_hole")
+            a2 = rospy.get_param("/tester/min_hole")
+            r1 = int(math.sqrt(a1/math.pi))
+            r2 = int(math.sqrt(a2/math.pi))
+            cv2.circle(img, (w//2, h//2), r1, (0, 0, 255), -1)
+            cv2.circle(img, (w//2, h//2), r2, (0, 255, 0), -1)
+            c1 = rospy.get_param("/tester/max_carbon")
+            c2 = rospy.get_param("/tester/min_carbon")
+            cv2.line(img, (w//2 + r1*2, h//2-c1//2), (w//2 + r1*2, h//2+c1//2), (0, 0, 255), 2)
+            cv2.line(img, (w//2 + r1*2 - 10, h//2-c1//2), (w//2 + r1*2 + 10, h//2-c1//2), (0, 0, 255), 2)
+            cv2.line(img, (w//2 + r1*2 - 10, h//2+c1//2), (w//2 + r1*2 + 10, h//2+c1//2), (0, 0, 255), 2)
+            cv2.line(img, (w//2 + r1*3, h//2-c2//2), (w//2 + r1*3, h//2+c2//2), (0, 255, 0), 2)
+            cv2.line(img, (w//2 + r1*3 - 10, h//2-c2//2), (w//2 + r1*3 + 10, h//2-c2//2), (0, 255, 0), 2)
+            cv2.line(img, (w//2 + r1*3 - 10, h//2+c2//2), (w//2 + r1*3 + 10, h//2+c2//2), (0, 255, 0), 2)
         img = cv2.resize(img, (0, 0,), fx=self.scale_value, fy=self.scale_value)
+            
         cv2.imwrite(self.file, img)
         self.ImageViewer.setPixmap(QPixmap.fromImage(QImage(self.file)))
         self.ImageViewer.adjustSize()
