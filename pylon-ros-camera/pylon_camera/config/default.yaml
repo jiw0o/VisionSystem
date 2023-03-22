@@ -31,7 +31,7 @@ camera_info_url: ""
 #  The desired publisher frame rate if listening to the topics.
 #  This parameter can only be set once at startup
 #  Calling the GrabImages-Action can result in a higher framerate
-frame_rate: 15.0
+frame_rate: 20.0
 
 trigger_timeout: 5000  # in ms
 grab_timeout: 500  # in ms
@@ -131,12 +131,12 @@ grab_strategy : 0
 #  To prevent lost frames configure the camera has to be configured
 #  with the MTU size the network card supports. A value greater 3000
 #  should be good (1500 for RaspberryPI)
-# gige:
-#  mtu_size: 3000
 
 #  Only used for GigE cameras.
 #  The inter-package delay in ticks to prevent lost frames.
 #  For most of GigE-Cameras, a value of 1000 is reasonable.
 #  For cameras used on a RaspberryPI this value should be set to 11772.
-# gige:
-#  inter_pkg_delay: 1000
+
+gige:
+  mtu_size: 3000
+  inter_pkg_delay: 1000

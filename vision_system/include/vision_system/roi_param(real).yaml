@@ -1,0 +1,21 @@
+roi :
+  light_upper_1 : 193
+  light_upper_2 : 160
+  light_upper_3 : 209
+  light_lower_1 : 1691
+  light_lower_2 : 1655
+  light_lower_3 : 1683
+  film_height : 1504
+  overlap12 : 32
+  overlap23 : 34
+  side_cut_left : 222
+  side_cut_right : 169
+tester :
+  min_hole : 50
+  max_hole : 10000
+  min_carbon : 50
+  max_carbon : 65
+  thresh : 100
+origin :
+  height : 2048
+  width : 2592

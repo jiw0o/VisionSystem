@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import rospy, sys, threading
+from collections import deque
 from std_msgs.msg import Int32
 from vision_msgs.srv import *
 
@@ -9,11 +10,14 @@ class ResultPinhole :
         self.result1 = rospy.Service('/result_1', TriggerSrv, self.callback)
         self.result2 = rospy.Service('/result_2', TriggerSrv, self.callback)
         self.result3 = rospy.Service('/result_3', TriggerSrv, self.callback)
-        self.total = rospy.Publisher('test_result', Int32, queue_size=10)
+        #self.total = rospy.Publisher('test_result', Int32, queue_size=10)
         self.marker_srv = rospy.ServiceProxy('marking_srv', ArduinoSrv)
         self.result = [-1, -1, -1]
         self.lock = threading.Lock()
         self.threads = []
+        self.films = 1
+        self.sft=deque()
+        for _ in range(3) : self.sft.append(0)
 
     def update_result(self, idx, holes):
         self.lock.acquire()
@@ -23,18 +27,34 @@ class ResultPinhole :
             rospy.loginfo("3 cams found " + str(total_hole) + " holes")
             self.result = [-1, -1, -1]
             self.marking(total_hole)
-        self.lock.release()
+            self.lock.release()
+        else :
+            self.lock.release()
 
     def reset_result(self, idx, holes):
         self.lock.acquire()
-        self.result[idx] = -1
+        if self.result[idx] >= 0 :
+            missed = []
+            holes = 0
+            for i in range(3) :
+                if self.result[i] >= 0 :
+                    holes += self.result[i]
+                    self.result[i] = -1
+                else : missed.append(i+1)
+            rospy.loginfo("Found "+str(holes)+" holes / "+str(missed)+" cam missed interval")
+            self.marking(holes)
         self.lock.release()
 
     def marking(self, holes) :
-        rospy.loginfo("Mark Sticker on the Film\n")
+        if holes > 0 : rospy.loginfo("Mark Sticker on the Film\n")
+        else :  rospy.loginfo("Do not Mark Sticker\n")
+        self.films += 1
+        print(self.films)
+        self.sft.append(holes)
         try :
-            self.total.publish(holes)
-            result = self.marker_srv(holes)
+            #self.total.publish(holes)
+            print(self.sft)
+            result = self.marker_srv(self.sft.popleft())
         except rospy.ServiceException as e :
             print("Service call failed:", e)
             sys.exit(1)

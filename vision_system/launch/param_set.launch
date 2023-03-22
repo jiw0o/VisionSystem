@@ -1,0 +1,5 @@
+<launch>
+    <rosparam file="$(find vision_system)/include/vision_system/roi_param.yaml" command='load'/>
+    <param name="system_path" value="$(find vision_system)"/>
+    <param name="gui_path" value="$(find vision_gui)"/>
+</launch>

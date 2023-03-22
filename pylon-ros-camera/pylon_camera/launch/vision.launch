@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="respawn" default="false" />
+    <arg name="respawn" default="true" />
     <arg name="debug" default="false" />
-    <arg name="mtu_size" default="1500" />
+    <arg name="mtu_size" default="3000" />
     <arg name="startup_user_set" default="CurrentSetting" />
     <arg name="enable_status_publisher" default="true" />
     <arg name="enable_current_params_publisher" default="true" />
