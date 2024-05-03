@@ -1,2 +1,2 @@
 # VisionSystem
-to make vision system
+For automated defect inspection system for heating film
